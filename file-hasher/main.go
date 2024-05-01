@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// ConfigFile is the struct that contains the configuration parameters specified in the config.json file
 type ConfigFile struct {
 	CsvSeparator string `json:"csvseparator"`
 	CsvDelimiter string `json:"csvdelimiter"`
@@ -21,6 +22,7 @@ type ConfigFile struct {
 
 var Cfg ConfigFile
 
+// initialize the ConfigFile, the path to the config file is specified as the first command line argument
 func init() {
 	confFile := os.Args[1]
 	confJson, err := os.Open(confFile)
@@ -32,7 +34,7 @@ func init() {
 	byteValue, _ := io.ReadAll(confJson)
 
 	// we unmarshal our byteArray which contains our
-	// jsonFile's content into 'users' which we defined above
+	// confFile's content into 'users' which we defined above
 	json.Unmarshal(byteValue, &Cfg)
 }
 
@@ -44,6 +46,7 @@ type FileData struct {
 	FileChecksum string
 }
 
+// toCsvRow returns a formatted string which represent FileData content on a single csv row
 func (r FileData) toCsvRow(separator string, delimiter string, encapsulated bool) string {
 	if encapsulated {
 		return strconv.Quote(r.FilePath) + separator + strconv.Quote(r.FileName) + separator + strconv.Quote(r.FileSize) + separator + strconv.Quote(r.FileChecksum) + delimiter
@@ -75,7 +78,7 @@ func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error
 	} else {
 		return FileData{"", "", "", ""}, true, nil
 	}
-} // we initialize our Users array
+}
 
 // ScanFileCsvOut is the callback function used by WalkDir, it calls GenerateFileChecksums to retrieve the file info as a FileData struct and then it append them to outfile.csv, in case the specified path is a File, it skips if it's a Directory
 func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
@@ -100,17 +103,6 @@ func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
 }
 
 func main() {
-
-	// we initialize our Users array
-	//err := Cfg.init(os.Args[1])
-
-	/*
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
-
-	log.Println(Cfg)
 
 	err := filepath.WalkDir(Cfg.TargetDir, ScanFileCsvOut)
 
