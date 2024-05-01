@@ -14,8 +14,8 @@ The usage is pretty simple:
 
 ## Configuration
 The only parameter taken by the tool is the location of the configuration file. The configuration file is a json file that contains the following:
-    - "csvseparator": the field separator to be used in the csv
-    - "csvdelimiter": the character to be used as a line delimiter in the csv
-    - "targetdir": the directory where the scan should start
-    - "outfile": the csv output file
+- "csvseparator": the field separator to be used in the csv
+- "csvdelimiter": the character to be used as a line delimiter in the csv
+- "targetdir": the directory where the scan should start
+- "outfile": the csv output file
 
