@@ -1,0 +1,6 @@
+{
+    "csvseparator": ",",
+    "csvdelimiter": "\n",
+    "targetdir": "/home/paolo/Documenti",
+    "outfile": "outfile.csv"
+}
