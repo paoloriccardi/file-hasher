@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ConfigFile is the struct that contains the configuration parameters specified in the config.json file
@@ -44,14 +45,15 @@ type FileData struct {
 	FileName     string
 	FileSize     string
 	FileChecksum string
+	ScanTime     time.Time
 }
 
 // toCsvRow returns a formatted string which represent FileData content on a single csv row
 func (r FileData) toCsvRow(separator string, delimiter string, encapsulated bool) string {
 	if encapsulated {
-		return strconv.Quote(r.FilePath) + separator + strconv.Quote(r.FileName) + separator + strconv.Quote(r.FileSize) + separator + strconv.Quote(r.FileChecksum) + delimiter
+		return strconv.Quote(r.FilePath) + separator + strconv.Quote(r.FileName) + separator + strconv.Quote(r.FileSize) + separator + strconv.Quote(r.FileChecksum) + separator + r.ScanTime.String() + delimiter
 	} else {
-		return r.FilePath + separator + r.FileName + separator + r.FileSize + separator + r.FileChecksum + delimiter
+		return r.FilePath + separator + r.FileName + separator + r.FileSize + separator + r.FileChecksum + separator + r.ScanTime.String() + delimiter
 	}
 }
 
@@ -59,13 +61,13 @@ func (r FileData) toCsvRow(separator string, delimiter string, encapsulated bool
 func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
-		return FileData{"", "", "", ""}, false, err
+		return FileData{"", "", "", "", time.Time{}}, false, err
 	}
 	defer f.Close()
 
 	fInfo, err := f.Stat()
 	if err != nil {
-		return FileData{"", "", "", ""}, false, err
+		return FileData{"", "", "", "", time.Time{}}, false, err
 	}
 
 	if !fInfo.IsDir() {
@@ -73,10 +75,10 @@ func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error
 		if _, err := io.Copy(h, f); err != nil {
 			log.Fatal()
 		}
-		fdata := FileData{strings.ReplaceAll(filepath, fInfo.Name(), ""), fInfo.Name(), strconv.FormatInt(fInfo.Size(), 10), hex.EncodeToString(h.Sum(nil))}
+		fdata := FileData{strings.ReplaceAll(filepath, fInfo.Name(), ""), fInfo.Name(), strconv.FormatInt(fInfo.Size(), 10), hex.EncodeToString(h.Sum(nil)), time.Now()}
 		return fdata, false, nil
 	} else {
-		return FileData{"", "", "", ""}, true, nil
+		return FileData{"", "", "", "", time.Time{}}, true, nil
 	}
 }
 

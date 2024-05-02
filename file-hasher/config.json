@@ -1,6 +1,6 @@
 {
     "csvseparator": ",",
     "csvdelimiter": "\n",
-    "targetdir": "/home/paolo/Documenti",
-    "outfile": "out/outfile.csv"
+    "targetdir": "C:\\Users\\paolo\\OneDrive\\Desktop",
+    "outfile": "out\\outfile.csv"
 }
