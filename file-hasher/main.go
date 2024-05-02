@@ -45,7 +45,7 @@ func init() {
 	json.Unmarshal(byteValue, &Cfg)
 
 	// If the outfile field is an empty string in the config file it means we want to use sqlite as the output sink for our data.
-	if Cfg.OutFile != "" {
+	if Cfg.OutFile == "" {
 		dbfile, err := os.OpenFile(filepath.Join(Cfg.DBPath, Cfg.DBFile), os.O_RDWR|os.O_CREATE, 0755)
 		if errors.Is(err, os.ErrNotExist) {
 			log.Fatal(err)
