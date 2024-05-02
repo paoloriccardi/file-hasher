@@ -1,4 +1,5 @@
 file-hasher/build/*
 file-hasher/out/*
 file-hasher/data/*.db
+file-hasher/*.exe
 *.exe
