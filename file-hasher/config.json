@@ -1,7 +1,7 @@
 {
     "csvseparator": ",",
     "csvdelimiter": "\n",
-    "targetdir": "/home/paolo/Documents",
+    "targetdir": "/starting/directory/",
     "outfile": "",
     "dbpath":"data",
     "dbfile":"database.db"
