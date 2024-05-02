@@ -122,7 +122,8 @@ func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error
 	if !fInfo.IsDir() {
 		h := sha1.New()
 		if _, err := io.Copy(h, f); err != nil {
-			log.Fatal()
+			log.Println(err)
+			return FileData{"", "", "", "", time.Time{}}, true, nil
 		}
 		fdata := FileData{strings.ReplaceAll(filepath, fInfo.Name(), ""), fInfo.Name(), strconv.FormatInt(fInfo.Size(), 10), hex.EncodeToString(h.Sum(nil)), time.Now()}
 		return fdata, false, nil
@@ -149,6 +150,28 @@ func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
 				return err
 			}
 		} else {
+			log.Println("Sonfig file could be malformed, outfile null on csv export")
+		}
+
+	}
+	return nil
+}
+
+// ScanFileSqliteOut is the callback function used by WalkDir, it calls GenerateFileChecksums to retrieve the file info as a FileData struct and then it insert the data in a sqlite database
+func ScanFileSqliteOut(path string, d os.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+
+	fdata, isdir, err := GenerateFileChecksum(path, d)
+	if err != nil {
+		return err
+	}
+
+	if !isdir {
+		if Cfg.OutFile != "" {
+			log.Println("Sonfig file could be malformed, outfile not null on sqlite export")
+		} else {
 			db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
 			if err != nil {
 				log.Println(err)
@@ -164,8 +187,16 @@ func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
 
 func main() {
 
-	err := filepath.WalkDir(Cfg.TargetDir, ScanFileCsvOut)
-	if err != nil {
-		log.Println(err)
+	if Cfg.OutFile != "" {
+		err := filepath.WalkDir(Cfg.TargetDir, ScanFileCsvOut)
+		if err != nil {
+			log.Println(err)
+		}
+	} else {
+		err := filepath.WalkDir(Cfg.TargetDir, ScanFileSqliteOut)
+		if err != nil {
+			log.Println(err)
+		}
 	}
+
 }
