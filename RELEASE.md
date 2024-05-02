@@ -1,7 +1,8 @@
-## RELEASE NOTE
+# RELEASE NOTE
 
-*02/05/2024*
+## *02/05/2024*
 
+### Build
 Succesfully tested on windows, in order to build the tool succesfully I had to: 
 
 Install [Msys64][mysis] and gcc on mingw64 with pacman:
@@ -26,9 +27,13 @@ For more details, see:
 - [Install without gcc (not possible)][mattnforum]
 - [Getting errors when running go project that uses github.com/mattn/go-sqlite3 library][def]
 
+### Select datasink output type
+Used strategy pattern for adding new datasink output type, actually supported both:
+- csv single file
+- sqlite database
+
 ## TODO
 
-- Have a cleaner way than an `if` statement to tell the tool to either send the output to a csv or to a sqlite database
 - Export duplicates found in the file collection
 
 

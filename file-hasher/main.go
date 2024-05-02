@@ -132,8 +132,22 @@ func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error
 	}
 }
 
-// ScanFileCsvOut is the callback function used by WalkDir, it calls GenerateFileChecksums to retrieve the file info as a FileData struct and then it append them to outfile.csv, in case the specified path is a File, it skips if it's a Directory
-func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
+type DataSink struct {
+	dsOutputType DSOutputType
+}
+
+func (ds *DataSink) setDsOutputType(ot DSOutputType) {
+	ds.dsOutputType = ot
+}
+
+type DSOutputType interface {
+	scanFile(path string, d os.DirEntry, err error) error
+}
+
+type CsvSingleFileOutType struct {
+}
+
+func (c *CsvSingleFileOutType) scanFile(path string, d os.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -157,8 +171,10 @@ func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
 	return nil
 }
 
-// ScanFileSqliteOut is the callback function used by WalkDir, it calls GenerateFileChecksums to retrieve the file info as a FileData struct and then it insert the data in a sqlite database
-func ScanFileSqliteOut(path string, d os.DirEntry, err error) error {
+type SqliteDatabaseOutType struct {
+}
+
+func (s *SqliteDatabaseOutType) scanFile(path string, d os.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -187,16 +203,13 @@ func ScanFileSqliteOut(path string, d os.DirEntry, err error) error {
 
 func main() {
 
-	if Cfg.OutFile != "" {
-		err := filepath.WalkDir(Cfg.TargetDir, ScanFileCsvOut)
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		err := filepath.WalkDir(Cfg.TargetDir, ScanFileSqliteOut)
-		if err != nil {
-			log.Println(err)
-		}
+	ds := DataSink{}
+	ot := SqliteDatabaseOutType{}
+	ds.setDsOutputType(&ot)
+
+	err := filepath.WalkDir(Cfg.TargetDir, ds.dsOutputType.scanFile)
+	if err != nil {
+		log.Println(err)
 	}
 
 }
