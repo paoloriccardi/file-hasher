@@ -48,13 +48,13 @@ The usage is pretty simple:
 ## Configuration
 The only parameter taken by the tool is the location of the configuration file. The configuration file is a json file that contains the following:
 
-- `csvseparator` the field separator to be used in the csv
-- `csvdelimiter` the character to be used as a line delimiter in the csv
-- `targetdir` the directory where the scan should start
-- `outfile` the csv output file, if this is set to something different than `""` the output will be produced in csv, otherwise the next two parameters will be used to insert data in a sqlite database 
-- `dbpath` the sqlite3 database path (usually the `data` folder)
-- `dbfile` the sqlite3 database file
-
+- `csv_separator` the field separator to be used in the csv
+- `csv_delimiter` the character to be used as a line delimiter in the csv
+- `target_dir` the directory where the scan should start
+- `out_file` the csv output file, used if the attribute `export_to` is equal to *csv*  
+- `db_path` the sqlite3 database path (usually the `data` folder)
+- `db_file` the sqlite3 database file
+- `export_to` can be either *sqlite|csv*
 
 
 [mysis]: https://www.msys2.org/

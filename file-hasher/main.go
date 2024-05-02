@@ -19,12 +19,13 @@ import (
 
 // ConfigFile is the struct that contains the configuration parameters specified in the config.json file
 type ConfigFile struct {
-	CsvSeparator string `json:"csvseparator"`
-	CsvDelimiter string `json:"csvdelimiter"`
-	TargetDir    string `json:"targetdir"`
-	OutFile      string `json:"outfile"`
-	DBPath       string `json:"dbpath"`
-	DBFile       string `json:"dbfile"`
+	CsvSeparator string `json:"csv_separator"`
+	CsvDelimiter string `json:"csv_delimiter"`
+	TargetDir    string `json:"target_dir"`
+	OutFile      string `json:"out_file"`
+	DBPath       string `json:"db_path"`
+	DBFile       string `json:"db_file"`
+	ExportTo     string `json:"export_to"`
 }
 
 var Cfg ConfigFile
@@ -132,22 +133,22 @@ func GenerateFileChecksum(filepath string, d os.DirEntry) (FileData, bool, error
 	}
 }
 
-type DataSink struct {
-	dsOutputType DSOutputType
+type dataSink struct {
+	fileScanExporter fileScanExporter
 }
 
-func (ds *DataSink) setDsOutputType(ot DSOutputType) {
-	ds.dsOutputType = ot
+func (ds *dataSink) setFileScanExporterType(fss fileScanExporter) {
+	ds.fileScanExporter = fss
 }
 
-type DSOutputType interface {
-	scanFile(path string, d os.DirEntry, err error) error
+type fileScanExporter interface {
+	fileScanExport(path string, d os.DirEntry, err error) error
 }
 
-type SingleCsvFileOutType struct {
+type csvOutFileExport struct {
 }
 
-func (c *SingleCsvFileOutType) scanFile(path string, d os.DirEntry, err error) error {
+func (c *csvOutFileExport) fileScanExport(path string, d os.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -164,17 +165,17 @@ func (c *SingleCsvFileOutType) scanFile(path string, d os.DirEntry, err error) e
 				return err
 			}
 		} else {
-			log.Println("SCnfig file could be malformed, outfile null during csv export")
+			log.Println("Config file could be malformed, outfile null during csv export")
 		}
 
 	}
 	return nil
 }
 
-type SqliteDatabaseOutType struct {
+type sqliteDBExport struct {
 }
 
-func (s *SqliteDatabaseOutType) scanFile(path string, d os.DirEntry, err error) error {
+func (s *sqliteDBExport) fileScanExport(path string, d os.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -203,11 +204,19 @@ func (s *SqliteDatabaseOutType) scanFile(path string, d os.DirEntry, err error) 
 
 func main() {
 
-	ds := DataSink{}
-	ot := SqliteDatabaseOutType{}
-	ds.setDsOutputType(&ot)
+	ds := dataSink{}
+	if Cfg.ExportTo == "sqlite" {
+		sqliteExport := sqliteDBExport{}
+		ds.setFileScanExporterType(&sqliteExport)
+	} else if Cfg.ExportTo == "csv" {
+		csvExport := csvOutFileExport{}
+		ds.setFileScanExporterType(&csvExport)
+	} else {
+		log.Fatal("Wrong export_to in config.json")
+		os.Exit(1)
+	}
 
-	err := filepath.WalkDir(Cfg.TargetDir, ds.dsOutputType.scanFile)
+	err := filepath.WalkDir(Cfg.TargetDir, ds.fileScanExporter.fileScanExport)
 	if err != nil {
 		log.Println(err)
 	}

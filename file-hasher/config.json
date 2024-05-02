@@ -1,8 +1,9 @@
 {
-    "csvseparator": ",",
-    "csvdelimiter": "\n",
-    "targetdir": "/starting/directory/",
-    "outfile": "",
-    "dbpath":"data",
-    "dbfile":"database.db"
+    "csv_separator": ",",
+    "csv_delimiter": "\n",
+    "target_dir": "/starting/directory/",
+    "out_file": "",
+    "db_path":"data",
+    "db:file":"database.db",
+    "export_to":"sqlite"
 }
