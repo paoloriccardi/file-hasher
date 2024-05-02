@@ -44,24 +44,27 @@ func init() {
 	// confFile's content into 'users' which we defined above
 	json.Unmarshal(byteValue, &Cfg)
 
-	dbfile, err := os.OpenFile(filepath.Join(Cfg.DBPath, Cfg.DBFile), os.O_RDWR|os.O_CREATE, 0755)
-	if errors.Is(err, os.ErrNotExist) {
-		log.Fatal(err)
-	}
-	defer dbfile.Close()
+	// If the outfile field is an empty string in the config file it means we want to use sqlite as the output sink for our data.
+	if Cfg.OutFile != "" {
+		dbfile, err := os.OpenFile(filepath.Join(Cfg.DBPath, Cfg.DBFile), os.O_RDWR|os.O_CREATE, 0755)
+		if errors.Is(err, os.ErrNotExist) {
+			log.Fatal(err)
+		}
+		defer dbfile.Close()
 
-	db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	defer db.Close()
+		db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		defer db.Close()
 
-	createFileTableIfnotExist := "CREATE TABLE IF NOT EXIST `files` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `directory` TEXT NULL, `filename` TEXT NULL, `size` text NULL, `sha1` TEXT NULL, `date` DATETIME NULL)"
+		createFileTableIfnotExist := "CREATE TABLE IF NOT EXISTS `files` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `directory` TEXT NULL, `filename` TEXT NULL, `size` text NULL, `sha1` TEXT NULL, `date` DATETIME NULL)"
 
-	_, err = db.Exec(createFileTableIfnotExist)
-	if err != nil {
-		log.Fatal(err)
+		_, err = db.Exec(createFileTableIfnotExist)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
@@ -146,7 +149,11 @@ func ScanFileCsvOut(path string, d os.DirEntry, err error) error {
 				return err
 			}
 		} else {
-			db, _ := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
+			db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
+			if err != nil {
+				log.Println(err)
+				return err
+			}
 			defer db.Close()
 			fdata.toSqliteDB(db)
 		}

@@ -2,7 +2,7 @@
     "csvseparator": ",",
     "csvdelimiter": "\n",
     "targetdir": "C:\\Users\\paolo\\OneDrive\\Desktop",
-    "outfile": "out\\outfile.csv",
+    "outfile": "",
     "dbpath":"data",
     "dbfile":"database.db"
 }
