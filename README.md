@@ -12,7 +12,7 @@ This tool was thought to help me find duplicated mp3 in my Music collection.
 
 On windows systems gcc is required in order to succesfully install and use the sqlite go driver *github.com/mattn/go-sqlite3*.
 
-### Install  mingw64 with pacman:
+### Install  mingw64 with pacman
 
 Install [Msys64][mysis] and then add *gcc* with *pacman* using the command: 
 ```
