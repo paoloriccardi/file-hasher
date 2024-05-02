@@ -144,10 +144,10 @@ type DSOutputType interface {
 	scanFile(path string, d os.DirEntry, err error) error
 }
 
-type CsvSingleFileOutType struct {
+type SingleCsvFileOutType struct {
 }
 
-func (c *CsvSingleFileOutType) scanFile(path string, d os.DirEntry, err error) error {
+func (c *SingleCsvFileOutType) scanFile(path string, d os.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (c *CsvSingleFileOutType) scanFile(path string, d os.DirEntry, err error) e
 				return err
 			}
 		} else {
-			log.Println("Sonfig file could be malformed, outfile null on csv export")
+			log.Println("SCnfig file could be malformed, outfile null during csv export")
 		}
 
 	}
@@ -186,7 +186,7 @@ func (s *SqliteDatabaseOutType) scanFile(path string, d os.DirEntry, err error) 
 
 	if !isdir {
 		if Cfg.OutFile != "" {
-			log.Println("Sonfig file could be malformed, outfile not null on sqlite export")
+			log.Println("Config file could be malformed, outfile not null during sqlite export")
 		} else {
 			db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
 			if err != nil {
