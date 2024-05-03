@@ -1,7 +1,5 @@
 # RELEASE NOTE
 
-## *02/05/2024*
-
 ### Build
 Succesfully tested on windows, in order to build the tool succesfully I had to: 
 
@@ -32,9 +30,13 @@ Used strategy pattern for adding new datasink output type, actually supported bo
 - csv single file
 - sqlite database
 
+### Find duplicates
+The duplicates are found with a sql query and they are inserted in a table called duplicates.
+
 ## TODO
 
-- Export duplicates found in the file collection
+- Export duplicates found in the file collection in other format than sqlite
+  - Find a more elegant way than sha1DuplicatesInSqliteToTable (use of interface in order to decouple the way to export the duplicates csv|table, plus pass source and sink as parameter)
 
 
 [mattnforum]: https://github.com/mattn/go-sqlite3/issues/212
