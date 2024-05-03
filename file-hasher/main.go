@@ -66,6 +66,14 @@ func init() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		createDuplicateTableIfnotExist := "CREATE TABLE IF NOT EXISTS `duplicates` (`directory` TEXT NULL, `filename` TEXT NULL, `size` text NULL, `sha1` TEXT NULL, `date` DATETIME NULL)"
+
+		_, err = db.Exec(createDuplicateTableIfnotExist)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	}
 
 }
@@ -202,6 +210,32 @@ func (s *sqliteDBExport) fileScanExport(path string, d os.DirEntry, err error) e
 	return nil
 }
 
+// TODO will need a more elegant engineering
+func sha1DuplicatesInSqliteToTable() error {
+	db, err := sql.Open("sqlite3", filepath.Join(Cfg.DBPath, Cfg.DBFile))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer db.Close()
+
+	insertDuplicatesQuery := `INSERT INTO duplicates SELECT directory,filename,size,sha1,date FROM ( SELECT *, COUNT(*) OVER (PARTITION BY sha1) AS cnt FROM files) AS t WHERE t.cnt > 1;`
+	statement, err := db.Prepare(insertDuplicatesQuery)
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statement.Exec()
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 
 	ds := dataSink{}
@@ -220,5 +254,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	sha1DuplicatesInSqliteToTable()
 
 }
