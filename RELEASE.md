@@ -1,7 +1,7 @@
 # RELEASE NOTE
 
 ### Build
-Succesfully tested on windows, in order to build the tool succesfully I had to: 
+Succesfully tested on windows, in order to build the tool correctly I had to: 
 
 Install [Msys64][mysis] and gcc on mingw64 with pacman:
 ```
