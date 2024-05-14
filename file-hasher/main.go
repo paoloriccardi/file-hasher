@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"database/sql"
 	"encoding/hex"
@@ -14,18 +15,26 @@ import (
 	"strings"
 	"time"
 
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // ConfigFile is the struct that contains the configuration parameters specified in the config.json file
 type ConfigFile struct {
-	CsvSeparator string `json:"csv_separator"`
-	CsvDelimiter string `json:"csv_delimiter"`
-	TargetDir    string `json:"target_dir"`
-	OutFile      string `json:"out_file"`
-	DBPath       string `json:"db_path"`
-	DBFile       string `json:"db_file"`
-	ExportTo     string `json:"export_to"`
+	CsvSeparator   string `json:"csv_separator"`
+	CsvDelimiter   string `json:"csv_delimiter"`
+	TargetDir      string `json:"target_dir"`
+	OutFile        string `json:"out_file"`
+	DBPath         string `json:"db_path"`
+	DBFile         string `json:"db_file"`
+	ExportTo       string `json:"export_to"`
+	BackupOutputTo string `json:"backup_output_to"`
+	AwsProfile     string `json:"aws_profile"`
+	AwsBucketName  string `json:"aws_bucket_name"`
 }
 
 var Cfg ConfigFile
@@ -256,5 +265,42 @@ func main() {
 	}
 
 	sha1DuplicatesInSqliteToTable()
+
+	if Cfg.BackupOutputTo == "aws" {
+		file, err := os.Open(filepath.Join(Cfg.DBPath, Cfg.DBFile))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		// get the file size and read
+		// the file content into a buffer
+		fileInfo, _ := file.Stat()
+		var size = fileInfo.Size()
+		buffer := make([]byte, size)
+		file.Read(buffer)
+
+		awscfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(Cfg.AwsProfile))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Create an Amazon S3 service client
+		client := s3.NewFromConfig(awscfg)
+
+		// config settings: this is where you choose the bucket,
+		// filename, content-type and storage class of the file
+		// you're uploading
+		out, s3err := client.PutObject(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(Cfg.AwsBucketName),
+			Key:    aws.String(file.Name()),
+			Body:   bytes.NewReader(buffer),
+		})
+
+		if s3err != nil {
+			log.Fatal(s3err, out)
+		}
+
+	}
 
 }
