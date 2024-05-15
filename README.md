@@ -36,13 +36,36 @@ Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This 
 
 It is required by the sqlite *mattn/sqlite3* library to have CGO enabled during the build via: `go env -w CGO_ENABLED=1`  otherwise the sqlite library won't work.
 
-### Windows|Linux - Install the driver
+### Windows|Linux - Install the sqlite driver
 
 Finally get and install the drivers:
 
 ```
 go get github.com/mattn/go-sqlite3
 go install github.com/mattn/go-sqlite3
+```
+
+## Using AWS S3 to store results
+
+It is possible to save a copy of the results in the form of a `.db` sqlite file or a `csv` file to an S3 Bucket, in order to do so the value for the field `backup_output_to` in the `config.json` file must be `aws`.
+
+### Create a IAM user
+You will need to create a *IAM* user with the following permissions on the bucket you want to use to store the outputs:
+- ListBucket
+- GetBucketLocation
+- GetObject
+- PutObject
+- DeleteObject  
+
+*My advice here is to put your user in a group that has a policy with the desired permissions rather than attach the policy straight to the user* 
+
+### Install AWS Go SDK
+
+The needed libraries can be installed with the following commands:
+```
+go get github.com/aws/aws-sdk-go-v2
+go get github.com/aws/aws-sdk-go-v2/config 
+go get github.com/aws/aws-sdk-go-v2/service/s3
 ```
 
 ## How to use the tool
@@ -60,6 +83,9 @@ The only parameter taken by the tool is the location of the configuration file. 
 - `db_path` the sqlite3 database path (usually the `data` folder)
 - `db_file` the sqlite3 database file
 - `export_to` can be either *sqlite|csv*
+- `backup_output_to` if the value is "aws" the results file will be stored on an S3 bucket 
+- `aws_profile` the profile you want to use in your *credentials* file (in your *.aws* directory)
+- `aws_bucket_name`  the name of the bucket/folder where you want to store the file
 
 
 [mysis]: https://www.msys2.org/
