@@ -1,0 +1,12 @@
+{
+    "csv_separator": "<,>",
+    "csv_delimiter": "<\n>",
+    "target_dir": "<the path from where the scan starts>",
+    "out_file": "<outfile.csv>",
+    "db_path":"<path to db file>",
+    "db_file":"<database.db>",
+    "export_to":"<sqlite/csv>",
+    "backup_output_to": "<aws to backup results on S3>",
+    "aws_profile": "<profile in your aws credentials file>",
+    "aws_bucket_name": "<your-bucket-name>/<your-folder>"
+}
